@@ -1,0 +1,14 @@
+Open, read 1024 bytes and close /dev/random 10000 times and run time of each
+
+open
+	mean: 0.81
+	variance: 0.34
+	standard deviation: 0.58
+read
+	mean: 18.16
+	variance: 2.47
+	standard deviation: 1.57
+close
+	mean: 0.27
+	variance: 0.20
+	standard deviation: 0.44
