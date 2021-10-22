@@ -1,7 +1,11 @@
 #include "helper.h"
 
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <memory.h>
 #include <stdio.h>
+#include <unistd.h>
 
 double *
 numbers_from_file(const char *filename, size_t n, size_t *read) {
@@ -194,6 +198,162 @@ merge_hist_files(size_t dest[], size_t bin_count,
 
 next:
         safe_free(h, sizeof(double) * hist_length);
+    }
+
+    return 0;
+}
+
+int
+create_shm(const char *shm_name, size_t shm_size) {
+    int fd;
+    void *shmp;
+
+    if (!shm_name || shm_size == 0) return -1;
+
+    // Open or create shared memory
+    fd = shm_open(shm_name, O_CREAT | O_RDWR | O_EXCL,
+            S_IRUSR | S_IWUSR);
+    if (fd == -1) {
+        perror("shm_open");
+        return -1;
+    }
+
+    // Allocate memory
+    if (ftruncate(fd, shm_size) == -1) {
+        perror("ftruncate");
+        close(fd);
+        shm_unlink(shm_name);
+        return -1;
+    }
+
+    // Fill allocated memory with 0's
+    shmp = mmap(NULL, shm_size,
+            PROT_READ | PROT_WRITE,
+            MAP_SHARED, fd, 0);
+    if (shmp == MAP_FAILED) {
+        perror("mmap");
+        close(fd);
+        shm_unlink(shm_name);
+        return -1;
+    }
+
+    memset(shmp, 0, shm_size);
+
+    // Cleanup
+    if (munmap(shmp, shm_size) == -1) {
+        perror("munmap");
+        close(fd);
+        shm_unlink(shm_name);
+        return -1;
+    }
+
+    if (close(fd) == -1) {
+        perror("close");
+        shm_unlink(shm_name);
+        return -1;
+    }
+
+    return 0;
+}
+
+void *
+get_shm(const char *shm_name, size_t shm_size, int *fd) {
+    if (!shm_name || shm_size == 0 || !fd) return NULL;
+
+    if ((*fd = shm_open(shm_name, O_RDWR, 0)) == -1) {
+        perror("shm_open");
+        shm_unlink(shm_name);
+        return NULL;
+    }
+
+    void *shmp = mmap(NULL, shm_size,
+            PROT_READ | PROT_WRITE,
+            MAP_SHARED, *fd, 0);
+    if (shmp == MAP_FAILED) {
+        perror("mmap");
+        close(*fd);
+        shm_unlink(shm_name);
+        return NULL;
+    }
+
+    return shmp;
+}
+
+int
+cleanup_shm(void *shmp, const char *shm_name, size_t shm_size, int fd) {
+    if (!shmp || shm_size == 0 || fd < 0) return -1;
+
+    if (munmap(shmp, shm_size) == -1) {
+        perror("munmap");
+        close(fd);
+        shm_unlink(shm_name);
+        return -1;
+    }
+
+    if (close(fd) == -1) {
+        perror("close");
+        shm_unlink(shm_name);
+        return -1;
+    }
+
+    return 0;
+}
+
+int
+create_sem(const char *sem_name) {
+    if (!sem_name) return -1;
+
+    sem_t *sem = sem_open(sem_name, O_CREAT | O_EXCL, 0644, 1);
+    if (sem == SEM_FAILED) {
+        perror("sem_open");
+        return -1;
+    }
+
+    if (sem_close(sem) == -1) {
+        perror("sem_close");
+        sem_unlink(sem_name);
+        return -1;
+    }
+
+    return 0;
+}
+
+sem_t *
+open_wait_sem(const char *sem_name) {
+    if (!sem_name) return NULL;
+    
+    sem_t *sem = sem_open(sem_name, O_RDWR);
+    if (sem == SEM_FAILED) {
+        perror("sem_open");
+        sem_unlink(sem_name);
+        return NULL;
+    }
+
+    if (sem_wait(sem) == -1) {
+        perror("sem_wait");
+        sem_close(sem);
+        sem_unlink(sem_name);
+        return NULL;
+    }
+
+    return sem;
+}
+
+int
+post_close_sem(sem_t *sem, const char *sem_name) {
+    if (!sem || !sem_name) return -1;
+
+    if (sem_post(sem) == -1) {
+        perror("sem_post");
+        sem_close(sem);
+        sem_unlink(sem_name);
+        return -1;
+    }
+
+    if (sem_close(sem) == -1) {
+        perror("sem_close");
+        sem_unlink(sem_name);
+        return -1;
     }
 
     return 0;

@@ -1,6 +1,7 @@
 #ifndef PROJECT1_HELPER_H
 #define PROJECT1_HELPER_H
 
+#include <semaphore.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -84,4 +85,23 @@ int
 merge_hist_files(size_t dest[], size_t bin_count, 
         const char *filename_prefix, size_t hist_count);
 
+int
+create_shm(const char *shm_name, size_t shm_size);
+
+void *
+get_shm(const char *shm_name, size_t shm_size, int *fd);
+
+int
+cleanup_shm(void *shmp, const char *shm_name, size_t shm_size, int fd);
+
+int
+create_sem(const char *sem_name);
+
+sem_t *
+open_wait_sem(const char *sem_name);
+
+int
+post_close_sem(sem_t *sem, const char *sem_name);
+
 #endif //PROJECT1_HELPER_H
+

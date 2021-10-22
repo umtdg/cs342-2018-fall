@@ -1,13 +1,20 @@
+CC = gcc
+CVERSION = gnu11
+CCFLAGS = -Wall -Wextra -Werror -g -m64 -std=$(CVERSION)
+LDFLAGS = -lpthread -lrt
+FILES = helper.c
+
 all: phistogram thistogram syn_phistogram
 phistogram:
-	gcc -Wall -Wextra -Werror -g -std=c11 -m64 helper.c phistogram.c -o phistogram
+	mkdir -p bin
+	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) phistogram.c -o bin/phistogram
 thistogram:
-	gcc -Wall -Wextra -Werror -g -std=c11 -m64 -lpthread helper.c thistogram.c -o thistogram
+	mkdir -p bin
+	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) thistogram.c -o bin/thistogram
 syn_phistogram:
-	gcc -Wall -Wextra -Werror -g -std=gnu11 -m64 -lpthread -lrt helper.c syn_phistogram.c -o syn_phistogram
+	mkdir -p bin
+	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) syn_phistogram.c -o bin/syn_phistogram
 clear:
-	rm -rf phistogram
-	rm -rf thistogram
-	rm -rf syn_phistogram
 	rm -rf hist*.txt
 	rm -rf out*.txt
+	rm -rf bin
