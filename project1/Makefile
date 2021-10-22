@@ -6,15 +6,14 @@ FILES = helper.c
 
 all: phistogram thistogram syn_phistogram
 phistogram:
-	mkdir -p bin
-	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) phistogram.c -o bin/phistogram
+	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) phistogram.c -o phistogram
 thistogram:
-	mkdir -p bin
-	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) thistogram.c -o bin/thistogram
+	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) thistogram.c -o thistogram
 syn_phistogram:
-	mkdir -p bin
-	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) syn_phistogram.c -o bin/syn_phistogram
+	$(CC) $(CCFLAGS) $(LDFLAGS) $(FILES) syn_phistogram.c -o syn_phistogram
 clear:
 	rm -rf hist*.txt
 	rm -rf out*.txt
-	rm -rf bin
+	rm -rf phistogram
+	rm -rf thistogram
+	rm -rf syn_phistogram
