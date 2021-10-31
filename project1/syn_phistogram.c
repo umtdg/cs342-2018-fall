@@ -12,6 +12,7 @@
 int
 main(int argc, char **argv) {
     if (argc < 6) {
+        print_usage("syn_phistogram");
         return 0;
     }
 
@@ -26,6 +27,7 @@ main(int argc, char **argv) {
     shm_size = sizeof(int) * bin_count;
 
     if ((size_t)argc < (6U + file_count)) {
+        print_usage("syn_phistogram");
         return 0;
     }
 
@@ -58,6 +60,8 @@ main(int argc, char **argv) {
             for (size_t i = 0; i < bin_count; i++) {
                 shmp[i] += hist[i];
             }
+
+            safe_free(hist, sizeof(size_t) * bin_count);
 
             if (cleanup_shm(shmp, SHM_NAME, shm_size, fd) == -1)
                 _exit(EXIT_FAILURE);

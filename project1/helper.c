@@ -359,3 +359,10 @@ post_close_sem(sem_t *sem, const char *sem_name) {
     return 0;
 }
 
+void
+print_usage(const char *prog) {
+    if (!prog) return;
+    printf("Usage:\n");
+    printf("\t%s [MINVAL] [MAXVAL] [BINCOUNT]"
+           " [FILECOUNT] [IFILE]... [OFILE]", prog);
+}

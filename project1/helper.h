@@ -103,5 +103,8 @@ open_wait_sem(const char *sem_name);
 int
 post_close_sem(sem_t *sem, const char *sem_name);
 
+void
+print_usage(const char *prog);
+
 #endif //PROJECT1_HELPER_H
 

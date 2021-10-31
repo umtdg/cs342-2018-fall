@@ -32,17 +32,10 @@ thread_function(void *arg) {
 }
 
 
-void
-print_usage() {
-    puts("Usage: ");
-    puts("\tthistogram [MINVALUE] [MAXVALUE] [BINCOUNT] "
-            "[FILECOUNT] [FILE]... [OUTFILE]");
-}
-
 int
 main(int argc, char **argv) {
     if (argc < 6) {
-        print_usage();
+        print_usage("thistogram");
         return 0;
     }
 
@@ -54,7 +47,7 @@ main(int argc, char **argv) {
     sscanf(argv[4], "%lu", &file_count);
 
     if ((size_t)argc < (6U + file_count)) {
-        print_usage();
+        print_usage("thistogram");
         return 0;
     }
 
